@@ -1,13 +1,11 @@
 'use client'
 
 import { db } from '@/utils/db'
-import { AIOutput } from '@/utils/schema'
+import { AIOutput, UserTemplates } from '@/utils/schema'
 import { HISTORY } from '@/utils/types'
 import { useUser } from '@clerk/nextjs'
 import { desc, eq } from 'drizzle-orm'
 import { useEffect, useState } from 'react'
-import { TEMPLATE } from '../_components/TemplateListSection'
-import Templates from '@/app/(data)/Templates'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { Copy, Check } from 'lucide-react'
@@ -16,12 +14,12 @@ const History = () => {
   const { user } = useUser()
   const [historyList, setHistoryList] = useState<HISTORY[]>([])
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [templates, setTemplates] = useState<
+    Record<string, { icon: string; name: string }>
+  >({})
 
   const getTemplateName = (slug: string) => {
-    const template: TEMPLATE | any = Templates?.find(
-      (item) => item.slug == slug
-    )
-    return template || { icon: '', name: 'Unknown' }
+    return templates[slug] || { icon: '', name: 'Unknown' }
   }
 
   const handleCopy = async (text: string, index: number) => {
@@ -29,6 +27,32 @@ const History = () => {
     setCopiedIndex(index)
     setTimeout(() => setCopiedIndex(null), 1000)
   }
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const fetchedTemplates = await db
+        .select({
+          slug: UserTemplates.slug,
+          icon: UserTemplates.icon,
+          name: UserTemplates.name,
+        })
+        .from(UserTemplates)
+
+      const templateMap = fetchedTemplates.reduce((acc, template) => {
+        if (template.slug) {
+          acc[template.slug] = {
+            icon: template.icon || '',
+            name: template.name || '',
+          }
+        }
+        return acc
+      }, {} as Record<string, { icon: string; name: string }>)
+
+      setTemplates(templateMap)
+    }
+
+    fetchTemplates()
+  }, [])
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -44,7 +68,7 @@ const History = () => {
           ...item,
           aiResponse: item.aiResponse || '',
           createdAt: item.createdAt || '',
-          model: item.model || '', // 모델 정보 추가
+          model: item.model || '',
         }))
       )
     }

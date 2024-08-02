@@ -62,9 +62,6 @@ const UsageTrack = () => {
         </div>
         <h2 className='text-sm my-2'>{remainingCredits} 크레딧 남음</h2>
       </div>
-      <Button className='w-full mt-5 text-primary' variant='secondary'>
-        업그레이드
-      </Button>
     </div>
   )
 }

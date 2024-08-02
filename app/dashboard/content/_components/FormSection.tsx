@@ -40,15 +40,17 @@ const FormSection = ({ selectedTemplate, userFormInput, loading }: Props) => {
 
   return (
     <div className='p-5 shadow-md border rounded-lg bg-white'>
-      <Image
-        src={selectedTemplate?.icon}
-        alt={selectedTemplate?.name}
-        width={50}
-        height={50}
-      />
-      <h2 className='text-2xl font-bold mb-2 text-primary'>
-        {selectedTemplate?.name}
-      </h2>
+      <div className='flex items-center space-x-2 mb-4'>
+        <Image
+          src={selectedTemplate?.icon}
+          alt={selectedTemplate?.name}
+          width={50}
+          height={50}
+        />
+        <h2 className='text-2xl font-bold mb-2 text-primary'>
+          {selectedTemplate?.name}
+        </h2>
+      </div>
       <p className='text-sm text-gray-500'>{selectedTemplate?.desc}</p>
       <form className='mt-6' onSubmit={handleSubmit}>
         {selectedTemplate?.form?.map((item, index) => (

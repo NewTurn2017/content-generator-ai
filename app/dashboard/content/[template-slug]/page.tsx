@@ -1,10 +1,8 @@
 'use client'
 
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import FormSection from '../_components/FormSection'
 import OutputSection from '../_components/OutputSection'
-import { TEMPLATE } from '../../_components/TemplateListSection'
-import Templates from '@/app/(data)/Templates'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -12,7 +10,7 @@ import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import moment from 'moment'
 import { db } from '@/utils/db'
-import { AIOutput } from '@/utils/schema'
+import { AIOutput, UserTemplates } from '@/utils/schema'
 import { TotalUsageContext } from '@/app/(context)/TotalUsageContext'
 
 import {
@@ -41,6 +39,7 @@ import { openaiChatCompletion } from '@/actions/openai'
 import { geminiChatCompletion } from '@/actions/googleai'
 import { claudeChatCompletion } from '@/actions/anthropicai'
 import { groqChatCompletion } from '@/actions/groqai'
+import { TEMPLATE } from '../../_components/TemplateListSection'
 
 interface Props {
   params: {
@@ -59,9 +58,30 @@ const CreateNewContent = ({ params }: Props) => {
   const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext)
   const router = useRouter()
 
-  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug === params['template-slug']
-  ) as TEMPLATE | undefined
+  const [selectedTemplate, setSelectedTemplate] = useState<TEMPLATE | null>(
+    null
+  )
+
+  useEffect(() => {
+    const fetchTemplate = async () => {
+      try {
+        const template = await db.query.UserTemplates.findFirst({
+          where: (userTemplate, { eq }) =>
+            eq(userTemplate.slug, params['template-slug']),
+        })
+        if (template) {
+          setSelectedTemplate({
+            ...template,
+            createdBy: template.userEmail, // userEmail을 createdBy로 사용
+          } as TEMPLATE)
+        }
+      } catch (error) {
+        console.error('템플릿 로딩 중 오류 발생:', error)
+      }
+    }
+
+    fetchTemplate()
+  }, [params['template-slug']])
 
   const generateAIContent = async (formData: any) => {
     if ((totalUsage as number) >= TOKEN_LIMIT) {
@@ -168,16 +188,18 @@ const CreateNewContent = ({ params }: Props) => {
           </Select>
         </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-5 p-5'>
+      <div className='grid grid-cols-1 md:grid-cols-3 md:gap-5 gap-y-5 p-2'>
         {/* Form Section */}
-        <FormSection
-          selectedTemplate={selectedTemplate}
-          userFormInput={(v: any) => generateAIContent(v)}
-          loading={loading}
-        />
+        {selectedTemplate && (
+          <FormSection
+            selectedTemplate={selectedTemplate}
+            userFormInput={(v: any) => generateAIContent(v)}
+            loading={loading}
+          />
+        )}
         {/* Output Section */}
         <div className='col-span-2'>
-          <OutputSection aiOutput={aiOutput} />
+          <OutputSection aiOutput={aiOutput} onOutputChange={setAiOutput} />
         </div>
       </div>
 
@@ -187,17 +209,11 @@ const CreateNewContent = ({ params }: Props) => {
           <AlertDialogHeader>
             <AlertDialogTitle>사용량 초과</AlertDialogTitle>
             <AlertDialogDescription>
-              AI 사용량이 한도를 초과했습니다. 계속하려면 결제 페이지로
-              이동하세요.
+              AI 사용량이 한도를 초과했습니다. 계속하려면 개발자에게 요청하세요.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>취소</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => router.push('/dashboard/billing')}
-            >
-              결제 페이지로 이동
-            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
