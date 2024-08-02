@@ -4,7 +4,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import FormSection from '../_components/FormSection'
 import OutputSection from '../_components/OutputSection'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ArrowRightCircle } from 'lucide-react'
 import Link from 'next/link'
 
 import { useUser } from '@clerk/nextjs'
@@ -156,36 +156,42 @@ const CreateNewContent = ({ params }: Props) => {
           </Button>
         </Link>
 
-        <div>
-          <Select
-            onValueChange={(value) => setSelectedModel(value)}
-            defaultValue='groq-llama-3.1-8b-instant'
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='모델 선택' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='gemini-1.5-flash'>
-                Google Gemini 1.5 Flash
-              </SelectItem>
-              <SelectItem value='gemini-1.5-pro'>
-                Google Gemini 1.5 Pro
-              </SelectItem>
-              <SelectItem value='openai-gpt-4o'>OpenAI GPT-4o</SelectItem>
-              <SelectItem value='openai-gpt-4o-mini'>
-                OpenAI GPT-4o Mini
-              </SelectItem>
-              <SelectItem value='anthropic-sonnet-3.5'>
-                Anthropic Sonnet 3.5
-              </SelectItem>
-              <SelectItem value='groq-llama-3.1-8b-instant'>
-                Groq Llama 3.1 8B Instant
-              </SelectItem>
-              <SelectItem value='groq-llama-3.1-70b-versatile'>
-                Groq Llama 3.1 70B Versatile
-              </SelectItem>
-            </SelectContent>
-          </Select>
+        <div className='flex space-x-2 items-center justify-center'>
+          <p className='flex items-center space-x-2'>
+            <span>모델 선택</span>{' '}
+            <ArrowRightCircle className='w-5 h-5 animate-pulse' />
+          </p>
+          <div>
+            <Select
+              onValueChange={(value) => setSelectedModel(value)}
+              defaultValue='groq-llama-3.1-8b-instant'
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='모델 선택' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='gemini-1.5-flash'>
+                  Google Gemini 1.5 Flash
+                </SelectItem>
+                <SelectItem value='gemini-1.5-pro'>
+                  Google Gemini 1.5 Pro
+                </SelectItem>
+                <SelectItem value='openai-gpt-4o'>OpenAI GPT-4o</SelectItem>
+                <SelectItem value='openai-gpt-4o-mini'>
+                  OpenAI GPT-4o Mini
+                </SelectItem>
+                <SelectItem value='anthropic-sonnet-3.5'>
+                  Anthropic Sonnet 3.5
+                </SelectItem>
+                <SelectItem value='groq-llama-3.1-8b-instant'>
+                  Groq Llama 3.1 8B Instant
+                </SelectItem>
+                <SelectItem value='groq-llama-3.1-70b-versatile'>
+                  Groq Llama 3.1 70B Versatile
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
       <div className='grid grid-cols-1 md:grid-cols-3 md:gap-5 gap-y-5 p-2'>
